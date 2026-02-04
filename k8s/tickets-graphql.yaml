@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets-graphql
+  namespace: parkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tickets-graphql
+  template:
+    metadata:
+      labels:
+        app: tickets-graphql
+    spec:
+      containers:
+      - name: tickets-graphql
+        image: cjgranda1/tickets-graphql:latest
+        env:
+        - name: PORT
+          value: "4000"
+        - name: DB_HOST
+          value: db-tickets
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: db_parkin_tickets
+        - name: DB_USERNAME
+          value: postgres
+        - name: ZONE_SERVICE_URL
+          value: http://zone-core:8080
+        - name: PERSONA_SERVICE_URL
+          value: http://ms-clientes:8081
+        - name: RABBITMQ_HOST
+          value: rabbitmq
+        - name: RABBITMQ_PORT
+          value: "5672"
+        - name: RABBITMQ_USERNAME
+          value: admin
+        - name: RABBITMQ_PASSWORD
+          value: admin
+        ports:
+        - containerPort: 4000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickets-graphql
+  namespace: parkin
+spec:
+  selector:
+    app: tickets-graphql
+  ports:
+  - port: 4000
+    targetPort: 4000
+  type: LoadBalancer

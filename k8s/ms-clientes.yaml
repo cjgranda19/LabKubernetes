@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-clientes
+  namespace: parkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-clientes
+  template:
+    metadata:
+      labels:
+        app: ms-clientes
+    spec:
+      containers:
+      - name: ms-clientes
+        image: cjgranda1/ms-clientes:latest
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://db-clientes:5432/db_parkin_users
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+        - name: SPRING_RABBITMQ_HOST
+          value: rabbitmq
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          value: admin
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: admin
+        ports:
+        - containerPort: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-clientes
+  namespace: parkin
+spec:
+  selector:
+    app: ms-clientes
+  ports:
+  - port: 8081
+    targetPort: 8081
+  type: LoadBalancer

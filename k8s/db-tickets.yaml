@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-tickets-pvc
+  namespace: parkin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-tickets
+  namespace: parkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-tickets
+  template:
+    metadata:
+      labels:
+        app: db-tickets
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        env:
+        - name: POSTGRES_DB
+          value: db_parkin_tickets
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: trust
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: db-tickets-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-tickets
+  namespace: parkin
+spec:
+  selector:
+    app: db-tickets
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP

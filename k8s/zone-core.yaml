@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zone-core
+  namespace: parkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zone-core
+  template:
+    metadata:
+      labels:
+        app: zone-core
+    spec:
+      containers:
+      - name: zone-core
+        image: cjgranda1/zone-core:latest
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://db-zones:5432/db_parkin_zone
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+        - name: SPRING_RABBITMQ_HOST
+          value: rabbitmq
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          value: admin
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: admin
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zone-core
+  namespace: parkin
+spec:
+  selector:
+    app: zone-core
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: LoadBalancer

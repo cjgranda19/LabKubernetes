@@ -1,0 +1,21 @@
+# Archivos de logs
+*.log
+zone_core.log
+
+# Colecciones de Postman
+users_parking.postman_collection.json
+zonas_parking.postman_collection.json
+
+# Scripts de deployment
+delete-k8s.ps1
+deploy-k8s.ps1
+push-to-dockerhub.ps1
+
+# Docker compose local
+docker-compose.yml
+
+# Archivos de documentación local
+DOCKER-README.md
+KUBERNETES-README.md
+SETUP-NETWORK.md
+TESTING-README.md
